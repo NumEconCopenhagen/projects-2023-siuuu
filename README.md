@@ -1,9 +1,9 @@
 # \[Group name\]
 
 **Group members:**
-- A
-- B
-- C
+- A: Ander Peter Bruun
+- B: Jakob Espinoza
+- C: Jan Mao Zeeberg
 
 This repository contains  
 1. Inaugural project. 
