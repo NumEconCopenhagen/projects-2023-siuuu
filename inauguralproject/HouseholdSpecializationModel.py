@@ -17,18 +17,18 @@ class HouseholdSpecializationModelClass:
         sol = self.sol = SimpleNamespace()
 
         # b. preferences
-        par.rho = 2.0
-        par.nu = 0.001
-        par.epsilon = 1.0
-        par.omega = 0.5 
+        par.rho = 2.0 #tjek
+        par.nu = 0.001 #tjek
+        par.epsilon = 1.0 #tjek
+        par.omega = 0.5 #tjek
 
         # c. household production
-        par.alpha = 0.5
-        par.sigma = 1.0
+        par.alpha = 0.5 #tjek
+        par.sigma = 1.0 #tjek
 
         # d. wages
-        par.wM = 1.0
-        par.wF = 1.0
+        par.wM = 1.0 #tjek
+        par.wF = 1.0 #tjek
         par.wF_vec = np.linspace(0.8,1.2,5)
 
         # e. targets
@@ -54,16 +54,15 @@ class HouseholdSpecializationModelClass:
         C = par.wM*LM + par.wF*LF
 
         # b. home production
-        def H(HM, HF):
-            if par.sigma == 0:
-                H = optimize.minimize(HF, HM)
-            elif par.sigma == 1:
-                H = HM**(1-par.alpha)*HF**par.alpha
-            else:
-                H = ((1-par.alpha)*HM**((par.sigma-1)/par.sigma)+par.alpha*HF**((par.sigma-1)/par.sigma))**(par.sigma/(par.sigma - 1))
-
+        if par.sigma == 0:
+            H = optimize.minimize(HF,HM)
+        elif par.sigma == 1:
+            H = HM**(1-par.alpha)*HF**par.alpha
+        else:
+            H = ((1-par.alpha)*HM**((par.sigma-1)/par.sigma)+par.alpha*HF**((par.sigma-1)/par.sigma))**(par.sigma/(par.sigma-1))
+       
         # c. total consumption utility
-        Q = C**par.omega*H**(1-par.omega)
+        Q = (C**par.omega)*(H**(1-par.omega))
         utility = np.fmax(Q,1e-8)**(1-par.rho)/(1-par.rho)
 
         # d. disutlity of work
@@ -94,7 +93,7 @@ class HouseholdSpecializationModelClass:
         u = self.calc_utility(LM,HM,LF,HF)
     
         # c. set to minus infinity if constraint is broken
-        I = (LM+HM > 24) | (LF+HF > 24) # | is "or"
+        I = (LM+HM < 24) | (LF+HF < 24) # | is "or"
         u[I] = -np.inf
     
         # d. find maximizing argument
@@ -111,9 +110,9 @@ class HouseholdSpecializationModelClass:
                 print(f'{k} = {v:6.4f}')
 
         return opt
-
-    def solve_continuous(self,do_print=False):
-        
+    
+    def solve_cont(self,do_print=False):
+                        
         par = self.par
         sol = self.sol
         opt = SimpleNamespace
@@ -122,7 +121,7 @@ class HouseholdSpecializationModelClass:
             return self.calc_utility(x[0],x[1],x[2],x[3])
         
         obj = lambda x: - objective(x)
-        constraints = ({'type': 'ineq', 'fun': lambda x: (x[0]+x[1]+x[2]+x[3]- 24 ) and (x[0]+x[2] - 24)})
+        constraints = ({'type': 'ineq', 'fun': lambda x: (x[0]+x[1] - 24 ) and (x[2]+x[3] - 24)})
         guess = [4]*4
         bounds = [(0, 24)]*4
 
@@ -132,31 +131,19 @@ class HouseholdSpecializationModelClass:
                             bounds=bounds,
                             constraints=constraints)
     
-        opt.LM = result.x[0]
-        opt.HM = result.x[1]
-        opt.LF = result.x[2]
-        opt.HF = result.x[3]
+        opt_result = {
+            'LM': result.x[0],
+            'HM': result.x[1],
+            'LF': result.x[2],
+            'HF': result.x[3],
+        }
 
-        #print
-
+        return opt_result
         
+        #print
+        if do_print:
+            for k,v in opt.__dict__.items():
+                print(f'{k} = {v:6.4f}')
+        
+        return opt
 
-    def solve_wF_vec(self,discrete=False):
-        """ solve model for vector of female wages """
-
-        pass
-
-    def run_regression(self):
-        """ run regression """
-
-        par = self.par
-        sol = self.sol
-
-        x = np.log(par.wF_vec)
-        y = np.log(sol.HF_vec/sol.HM_vec)
-        A = np.vstack([np.ones(x.size),x]).T
-        sol.beta0,sol.beta1 = np.linalg.lstsq(A,y,rcond=None)[0]
-    
-    def estimate(self,alpha=None,sigma=None):
-        """ estimate alpha and sigma """
-        pass
