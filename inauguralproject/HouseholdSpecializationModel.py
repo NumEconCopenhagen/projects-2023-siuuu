@@ -148,9 +148,32 @@ class HouseholdSpecializationModelClass:
         return opt
 
     def solve_wF_vec(self,discrete=False):
-        """ solve model for vector of female wages """
+        """ 
+        discrete: True or False. False is standard.
 
-        pass 
+        solve model for vector of female wages """
+        par = self.par
+        sol = self.sol
+        opt = SimpleNamespace()
+
+        # a. solve the model (discretly or continously) for a given female wage
+        for i, wF in enumerate(par.wF_vec):
+            par.wF = wF #set wF value
+            
+            if discrete==False:
+                opt = self.solve() #Optimal allocation solution (continous)
+            elif discrete==True:
+                opt = self.solve_discrete() #Optimal allocation solution (discrete)
+            else:
+                print("discrete must be True or False")
+
+            # saves solution for each female wage 
+            sol.LM_vec[i] = opt.LM
+            sol.HM_vec[i] = opt.HM
+            sol.LF_vec[i] = opt.LF
+            sol.HF_vec[i] = opt.HF
+            
+        return sol
 
     def run_regression(self):
         """ run regression """
