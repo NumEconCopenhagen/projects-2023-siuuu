@@ -181,10 +181,10 @@ class HouseholdSpecializationModelClass:
             for i, wF in enumerate(wf_vec):                 
                 par.wF = wF
                 result = self.solve_cont()
-                sol.LM_vec[i] = result.LM
-                sol.LF_vec[i] = result.LF
-                sol.HM_vec[i] = result.HM
-                sol.HF_vec[i] = result.HF
+                sol.LM_vec[i] = result['LM']
+                sol.LF_vec[i] = result.['LF']
+                sol.HM_vec[i] = result.['HM']
+                sol.HF_vec[i] = result.['HF']
             
             # Storing vectors and creating constant matrix
 
