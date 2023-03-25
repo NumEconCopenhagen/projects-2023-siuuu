@@ -163,45 +163,33 @@ class HouseholdSpecializationModelClass:
         A = np.vstack([np.ones(x.size),x]).T
         sol.beta0,sol.beta1 = np.linalg.lstsq(A,y,rcond=None)
     
-    def estimate(self,alpha=None,sigma=None):
-        """ estimate alpha and sigma """
+    def estimate(self,alpha=0.5,sigma=0.5):
+        """ 
+        alpha, sigma: set starting guess (standard=0.5) 
 
-        wf_vec = [0.8, 0.9, 1.0, 1.1, 1.2]
+        estimate optimal values for alpha and sigma """
         par = self.par
-        sol=self.sol
-        
-        # Defining objective to be minimized
+        sol = self.sol
+        opt = SimpleNamespace()
 
-        def objective(x, self):                              
-            par.alpha = x[0]
-            par.sigma = x[1]
-
-            # Solving the model for every w_f
-
-            for i, wF in enumerate(wf_vec):                 
-                par.wF = wF
-                result = self.solve_cont()
-                sol.LM_vec[i] = result['LM']
-                sol.LF_vec[i] = result.['LF']
-                sol.HM_vec[i] = result.['HM']
-                sol.HF_vec[i] = result.['HF']
+        # a. defines error function
+        def error(x):
+            alpha, sigma = x.ravel()
+            par.alpha = alpha # sets alpha value
+            par.sigma = sigma # sets sigma value
             
-            # Storing vectors and creating constant matrix
-
-            x = np.log(wf_vec)                                
-            y = np.log(sol.HF_vec/(sol.HM_vec)) 
-            A = np.vstack([np.ones(len(x)),x]).T 
-
-            # Doing the regression and setting output to the function we want to minize
-
-            sol.beta1, sol.beta0 = np.linalg.lstsq(A,y,rcond=None)[0]
-            return (0.4-sol.beta0)**2+(-0.1-sol.beta1)**2
-
-        # Defining bounds and initial guess        
-
-        guess = [1.]*2
-        bounds = [(0,2), (0,20)]
-
-        # Minimizing
-
-        res = optimize.minimize(objective, guess, args = (self), method = 'Nelder-Mead', bounds=bounds)
+            self.solve_wF_vec() # finds optimal household production 
+            sol = self.run_regression() # calculates beta0 and beta1
+            error = (sol.beta0 - par.beta0_target)**2 +(sol.beta1 - par.beta1_target)**2 #calculates error
+            return error
+        
+        # b. minimizes the error using 'Nelder-Mead' with bounds
+        solution = optimize.minimize(error,[alpha,sigma],method='Nelder-Mead', bounds=[(0.0001,0.999), (0.0001,10)])
+        
+        # c. saves optimal value for alpha and beta
+        opt.alpha = solution.x[0]
+        opt.sigma = solution.x[1]
+        error = (sol.beta0 - par.beta0_target)**2 +(sol.beta1 - par.beta1_target)**2 #calculates error
+        opt.error = error
+        
+        return opt
