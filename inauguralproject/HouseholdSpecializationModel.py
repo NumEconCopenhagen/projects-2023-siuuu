@@ -147,3 +147,61 @@ class HouseholdSpecializationModelClass:
         
         return opt
 
+    def solve_wF_vec(self,discrete=False):
+        """ solve model for vector of female wages """
+
+        pass 
+
+    def run_regression(self):
+        """ run regression """
+
+        par = self.par
+        sol = self.sol
+
+        x = np.log(par.wF_vec)
+        y = np.log(sol.HF_vec/sol.HM_vec)
+        A = np.vstack([np.ones(x.size),x]).T
+        sol.beta0,sol.beta1 = np.linalg.lstsq(A,y,rcond=None)
+    
+    def estimate(self,alpha=None,sigma=None):
+        """ estimate alpha and sigma """
+
+        wf_vec = [0.8, 0.9, 1.0, 1.1, 1.2]
+        par = self.par
+        sol=self.sol
+        
+        # Defining objective to be minimized
+
+        def objective(x, self):                              
+            par.alpha = x[0]
+            par.sigma = x[1]
+
+            # Solving the model for every w_f
+
+            for i, wF in enumerate(wf_vec):                 
+                par.wF = wF
+                solution = self.solve_cont()
+                sol.LM_vec[i] = solution.LM
+                sol.LF_vec[i] = solution.LF
+                sol.HM_vec[i] = solution.HM
+                sol.HF_vec[i] = solution.HF
+            
+            # Storing vectors and creating constant matrix
+
+            x = np.log(wf_vec)                                
+            y = np.log(sol.HF_vec/(sol.HM_vec)) 
+            A = np.vstack([np.ones(len(x)),x]).T 
+
+            # Doing the regression and setting output to the function we want to minize
+
+            sol.beta1, sol.beta0 = np.linalg.lstsq(A,y,rcond=None)[0]
+            return (0.4-sol.beta0)**2+(-0.1-sol.beta1)**2
+
+        # Defining bounds and initial guess        
+
+        guess = [1.]*2
+        bounds = [(0,2), (0,20)]
+
+        # Minimizing
+
+        res = optimize.minimize(objective, guess, args = (self), method = 'Nelder-Mead', bounds=bounds)
