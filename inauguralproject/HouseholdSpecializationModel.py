@@ -111,7 +111,7 @@ class HouseholdSpecializationModelClass:
 
         return opt
 
-    def solve(self,do_print=False):
+    def solve_con(self,do_print=False):
         """ solve model continously """
         par = self.par
         sol = self.sol
@@ -155,7 +155,7 @@ class HouseholdSpecializationModelClass:
             par.wF = wF 
 
             if discrete==False:
-                opt = self.solve_cont()
+                opt = self.solve_con()
             elif discrete==True:
                 opt = self.solve_discrete()
             else:
