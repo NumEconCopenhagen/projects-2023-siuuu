@@ -143,44 +143,4 @@ class HouseholdSpecializationModelClass:
                 print(f'{k} = {v:6.4f}')
 
         return opt
-  
 
-    def solve_wF_vec(self,discrete=False):
-        """ solve model for vector of female wages """
-        par = self.par
-        sol = self.sol
-        opt = SimpleNamespace()
-
-        for i, wF in enumerate(self.par.wF_vec):
-            par.wF = wF 
-
-            if discrete==False:
-                opt = self.solve_cont()
-            elif discrete==True:
-                opt = self.solve_discrete()
-            else:
-                print('eeee')
-
-            sol.LM_vec[i] = opt.LM
-            sol.LF_vec[i] = opt.HM
-            sol.HM_vec[i] = opt.LF
-            sol.HF_vec[i] = opt.HF
-        
-        return sol
-        pass
-
-    def run_regression(self):
-        """ run regression """
-
-        par = self.par
-        sol = self.sol
-
-        x = np.log(par.wF_vec)
-        y = np.log(sol.HF_vec/sol.HM_vec)
-        A = np.vstack([np.ones(x.size),x]).T
-        sol.beta0,sol.beta1 = np.linalg.lstsq(A,y,rcond=None)[0]
-    
-    def estimate(self,alpha=None,sigma=None):
-        """ estimate alpha and sigma """
-
-        pass
