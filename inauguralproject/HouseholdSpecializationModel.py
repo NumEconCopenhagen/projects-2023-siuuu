@@ -212,7 +212,7 @@ class HouseholdSpecializationModelClass:
     
 
 
-    def estimation_alphacons(self,sigma=0.5,epsilon=1,extended=True):
+    def estimation_extended(self,sigma=0.5,epsilon=1,extended=True):
         "Estimation when alpha is constant"
         par = self.par
         sol = self.sol
