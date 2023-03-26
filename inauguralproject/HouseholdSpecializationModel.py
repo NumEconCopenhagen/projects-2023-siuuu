@@ -114,31 +114,39 @@ class HouseholdSpecializationModelClass:
         return opt
         
 
-    def solve(self):
-        """ solves the model continously """
+    def solve_con(self,do_print=False):
+        """ solve model continously """
         par = self.par
         sol = self.sol
         opt = SimpleNamespace()
+
+        def objective(x):
+            return self.calc_utility(x[0], x[1], x[2], x[3])
         
-        # a. value function given the paremters LM, HM, LF and HF
-        def v(x):
-            value = -self.calc_utility(x[0],x[1],x[2],x[3])
-            if x[0]+[1]>24:
-                value = -np.inf
-            elif x[2]+x[3]>24:
-                value = -np.inf
-            return value
-
-        # b. optimize the valuefunction w.r.t LM, HM, LF and HF
-        result = optimize.minimize(v,[1,1,1,1],method='Nelder-Mead')
-
-        # c. save the optimal results
+        obj = lambda x: - objective(x)
+        constraints = ({'type': 'ineq', 'fun': lambda x: (24 - (x[0]+x[1]) ) and (24 - (x[2]+x[3]))})
+        guess = [4]*4
+        bounds = [(0, 24)]*4
+     # d. find maximizing argument
+        result = optimize.minimize(obj,
+                            guess,
+                            method='Nelder-Mead',
+                            bounds=bounds,
+                            constraints=constraints)
+    
         opt.LM = result.x[0]
         opt.HM = result.x[1]
         opt.LF = result.x[2]
         opt.HF = result.x[3]
-        
+        opt.u = self.calc_utility(opt.LM, opt.HM, opt.LF, opt.HF)
+
+
+        if do_print:
+            for k,v in opt.__dict__.items():
+                print(f'{k} = {v:6.4f}')
+
         return opt
+  
 
     def solve_wF_vec(self,discrete=False):
     
@@ -151,7 +159,7 @@ class HouseholdSpecializationModelClass:
             par.wF = wF #set wF value
             
             if discrete==False:
-                opt = self.solve() #Optimal allocation solution (continous)
+                opt = self.solve_con() #Optimal allocation solution (continous)
             elif discrete==True:
                 opt = self.solve_discrete() #Optimal allocation solution (discrete)
             else:
