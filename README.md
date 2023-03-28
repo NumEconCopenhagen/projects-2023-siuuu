@@ -1,4 +1,4 @@
-# \[Group name\]
+# \[Siuuu]
 
 **Group members:**
 - A: Ander Peter Bruun
