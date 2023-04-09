@@ -1,7 +1,7 @@
-# \[Group name\]
+# \[Siuuu]
 
 **Group members:**
-- A: Ander Peter Bruun
+- A: Anders Peter Bruun
 - B: Jakob Espinoza
 - C: Jan Mao Zeeberg
 
