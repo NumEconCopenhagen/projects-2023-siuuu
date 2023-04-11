@@ -28,7 +28,6 @@ chart_studio.tools.set_credentials_file(username='MagnusBuggeArtha', api_key='bJ
 #Henter historisk data som er hentet fra Kursudvikling præs her findes en fil med gamle kurser
 HistoriskNAVData = pd.read_excel(r'X:\OpdateringsMappe\Python Figurer\KurserHistorisk.xlsx', sheet_name="Data_NAV")
 HistoriskNAVData.drop(HistoriskNAVData.columns[0], axis=1, inplace=True)
-"C:\Users\Janze\OneDrive\Skrivebord\Introduction_to_programming\projects-2023-siuuu\dataproject\Kurshistorik, safemax.xlsx"
 #Henter data fra Safe12Max derfor skal denne sørges for at være opdateret
 DataSafe12Max = pd.read_excel(r'X:\OpdateringsMappe\Safe12Max.xlsm', sheet_name="Kurshistorik", usecols="B:G", skiprows=2)
 DataSafe12Max = DataSafe12Max.rename(columns = {'DMax':'Dmax'})
