@@ -6,8 +6,8 @@ The **results** of the project can be seen from running [dataproject.ipynb](data
 
 We apply the **following datasets**:
 
-1. dataX.csv (*source*) 
-1. dataY.csv (*source*)
+1. IndeksData_udenmakro.xlsx (Bloomberg) 
+1. Kurshistorik, safemax.xlsx (Artha)
 
 **Dependencies:** Apart from a standard Anaconda Python 3 installation, the project requires the following installations:
 
