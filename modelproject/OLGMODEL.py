@@ -25,16 +25,18 @@ class OLGModelClass():
         # b. firms
         par.production_function = 'cobb-douglas'
         par.alpha = 0.33 # capital weight
-        par.theta = 0.18 # substitution parameter
+        par.theta = 0 # substitution parameter
         par.delta = 0 # depreciation rate
+        par.A = 10 # TFP
+        par.n = 0.04# pop growth
 
         # c. government
-        par.tau_w = 0.18 # labor income tax
-        par.tau_r = 0.18 # capital income tax
+        par.tau_w = 0 # labor income tax
+        par.tau_r = 0 # capital income tax
 
         # d. misc
         par.K_lag_ini = 0 # initial capital stock
-        par.B_lag_ini = 0.0 # initial government debt
+        par.B_lag_ini = 0 # initial government debt
         par.simT = 50 # length of simulation
 
     def allocate(self):
@@ -148,7 +150,6 @@ def simulate_before_s(par,sim,t):
         sim.B_lag[t] = sim.B[t-1]
 
     # a. production and factor prices
-
     if par.production_function == 'cobb-douglas':
 
         # i. production
@@ -158,9 +159,6 @@ def simulate_before_s(par,sim,t):
         sim.rk[t] = par.alpha * sim.K_lag[t]**(par.alpha-1) * (1.0)**(1-par.alpha)
         sim.w[t] = (1-par.alpha) * sim.K_lag[t]**(par.alpha) * (1.0)**(-par.alpha)
 
-    else:
-
-        raise NotImplementedError('unknown type of production function')
 
     # b. no-arbitrage and after-tax return
     sim.r[t] = sim.rk[t]-par.delta # after-depreciation return
