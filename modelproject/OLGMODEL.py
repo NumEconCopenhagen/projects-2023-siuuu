@@ -8,15 +8,9 @@ class OLGModelClass():
     def __init__(self,do_print=True):
         """ create the model """
 
-        if do_print: print('initializing the model:')
-
         self.par = SimpleNamespace()
         self.sim = SimpleNamespace()
-
-        if do_print: print('calling .setup()')
         self.setup()
-
-        if do_print: print('calling .allocate()')
         self.allocate()
     
     def setup(self):
@@ -25,11 +19,11 @@ class OLGModelClass():
         par = self.par
 
         # a. household
-        par.sigma = 1.0 # CRRA coefficient
+        par.sigma = 1 # CRRA coefficient
         par.beta = 0.22 # discount factor
 
         # b. firms
-        par.production_function = 'cobb douglas'
+        par.production_function = 'cobb-douglas'
         par.alpha = 0.33 # capital weight
         par.theta = 0.18 # substitution parameter
         par.delta = 0 # depreciation rate
@@ -39,7 +33,7 @@ class OLGModelClass():
         par.tau_r = 0.18 # capital income tax
 
         # d. misc
-        par.K_lag_ini = 1.0 # initial capital stock
+        par.K_lag_ini = 0 # initial capital stock
         par.B_lag_ini = 0.0 # initial government debt
         par.simT = 50 # length of simulation
 
@@ -91,7 +85,6 @@ class OLGModelClass():
             # iii. simulate after s
             simulate_after_s(par,sim,t,s)
 
-        if do_print: print(f'simulation done in {time.time()-t0:.2f} secs')
 
 def find_s_bracket(par,sim,t,maxiter=500,do_print=False):
     """ find bracket for s to search in """
@@ -103,7 +96,6 @@ def find_s_bracket(par,sim,t,maxiter=500,do_print=False):
     # b. saving a lot is always possible 
     value = calc_euler_error(s_max,par,sim,t)
     sign_max = np.sign(value)
-    if do_print: print(f'euler-error for s = {s_max:12.8f} = {value:12.8f}')
 
     # c. find bracket      
     lower = s_min
@@ -116,8 +108,6 @@ def find_s_bracket(par,sim,t,maxiter=500,do_print=False):
         s = (lower+upper)/2 # midpoint
         value = calc_euler_error(s,par,sim,t)
 
-        if do_print: print(f'euler-error for s = {s:12.8f} = {value:12.8f}')
-
         # ii. check conditions
         valid = not np.isnan(value)
         correct_sign = np.sign(value)*sign_max < 0
@@ -126,9 +116,6 @@ def find_s_bracket(par,sim,t,maxiter=500,do_print=False):
         if valid and correct_sign: # found!
             s_min = s
             s_max = upper
-            if do_print: 
-                print(f'bracket to search in with opposite signed errors:')
-                print(f'[{s_min:12.8f}-{s_max:12.8f}]')
             return s_min,s_max
         elif not valid: # too low s -> increase lower bound
             lower = s
