@@ -25,18 +25,18 @@ class OLGModelClass():
         par = self.par
 
         # a. household
-        par.sigma = 2.0 # CRRA coefficient
-        par.beta = 1/1.40 # discount factor
+        par.sigma = 1.0 # CRRA coefficient
+        par.beta = 0.22 # discount factor
 
         # b. firms
-        par.production_function = 'ces'
-        par.alpha = 0.30 # capital weight
-        par.theta = 0.05 # substitution parameter
-        par.delta = 0.50 # depreciation rate
+        par.production_function = 'cobb douglas'
+        par.alpha = 0.33 # capital weight
+        par.theta = 0.18 # substitution parameter
+        par.delta = 0 # depreciation rate
 
         # c. government
-        par.tau_w = 0.10 # labor income tax
-        par.tau_r = 0.20 # capital income tax
+        par.tau_w = 0.18 # labor income tax
+        par.tau_r = 0.18 # capital income tax
 
         # d. misc
         par.K_lag_ini = 1.0 # initial capital stock
