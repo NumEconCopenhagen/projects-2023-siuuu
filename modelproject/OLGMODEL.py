@@ -161,16 +161,8 @@ def simulate_before_s(par,sim,t):
         sim.B_lag[t] = sim.B[t-1]
 
     # a. production and factor prices
-    if par.production_function == 'ces':
 
-        # i. production
-        sim.Y[t] = ( par.alpha*sim.K_lag[t]**(-par.theta) + (1-par.alpha)*(1.0)**(-par.theta) )**(-1.0/par.theta)
-
-        # ii. factor prices
-        sim.rk[t] = par.alpha*sim.K_lag[t]**(-par.theta-1) * sim.Y[t]**(1.0+par.theta)
-        sim.w[t] = (1-par.alpha)*(1.0)**(-par.theta-1) * sim.Y[t]**(1.0+par.theta)
-
-    elif par.production_function == 'cobb-douglas':
+    if par.production_function == 'cobb-douglas':
 
         # i. production
         sim.Y[t] = sim.K_lag[t]**par.alpha * (1.0)**(1-par.alpha)
