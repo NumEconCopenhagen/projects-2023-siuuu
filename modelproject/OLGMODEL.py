@@ -28,7 +28,6 @@ class OLGModelClass():
         par.theta = 0 # substitution parameter
         par.delta = 0 # depreciation rate
         par.A = 10 # TFP
-        par.n = 0.04# pop growth
 
         # c. government
         par.tau_w = 0 # labor income tax
@@ -137,8 +136,8 @@ def calc_euler_error(s,par,sim,t):
     simulate_before_s(par,sim,t+1) # next period
 
     # c. Euler equation
-    LHS = sim.C1[t]**(-par.sigma)
-    RHS = (1+sim.rt[t+1])*par.beta * sim.C2[t+1]**(-par.sigma)
+    LHS = sim.C2[t+1]**(par.sigma)
+    RHS = (1+sim.rt[t+1])*par.beta * sim.C1[t]**(par.sigma)
 
     return LHS-RHS
 
@@ -153,11 +152,11 @@ def simulate_before_s(par,sim,t):
     if par.production_function == 'cobb-douglas':
 
         # i. production
-        sim.Y[t] = sim.K_lag[t]**par.alpha * (1.0)**(1-par.alpha)
+        sim.Y[t] = par.A*sim.K_lag[t]**par.alpha
 
         # ii. factor prices
-        sim.rk[t] = par.alpha * sim.K_lag[t]**(par.alpha-1) * (1.0)**(1-par.alpha)
-        sim.w[t] = (1-par.alpha) * sim.K_lag[t]**(par.alpha) * (1.0)**(-par.alpha)
+        sim.rk[t] = par.A * par.alpha * sim.K_lag[t]**(par.alpha-1)
+        sim.w[t] = (1-par.alpha) * sim.K_lag[t]**(par.alpha)
 
 
     # b. no-arbitrage and after-tax return
@@ -180,7 +179,7 @@ def simulate_after_s(par,sim,t,s):
     """ simulate forward """
 
     # a. consumption of young
-    sim.C1[t] = (1-par.tau_w)*sim.w[t]*(1.0-s)
+    sim.C1[t] = (1-par.tau_w)*sim.w[t]-s
 
     # b. end-of-period stocks
     I = sim.Y[t] - sim.C1[t] - sim.C2[t] - sim.G[t]
