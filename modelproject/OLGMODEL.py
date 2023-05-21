@@ -1,3 +1,4 @@
+#%%
 from types import SimpleNamespace
 import time
 import numpy as np
@@ -87,12 +88,12 @@ class OLGModelClass():
             simulate_after_s(par,sim,t,s)
 
 
-def find_s_bracket(par,sim,t,maxiter=500,do_print=False):
+def find_s_bracket(par,sim,t,maxiter=1000,do_print=False):
     """ find bracket for s to search in """
 
     # a. maximum bracket
-    s_min = 0.0 + 1e-8 # save almost nothing
-    s_max = 1.0 - 1e-8 # save almost everything
+    s_min = 0.0 + 1e-9 # save almost nothing
+    s_max = 1.0 - 1e-9 # save almost everything
 
     # b. saving a lot is always possible 
     value = calc_euler_error(s_max,par,sim,t)
@@ -115,7 +116,7 @@ def find_s_bracket(par,sim,t,maxiter=500,do_print=False):
         
         # iii. next step
         if valid and correct_sign: # found!
-            s_min = s
+            s_min = lower
             s_max = upper
             return s_min,s_max
         elif not valid: # too low s -> increase lower bound
@@ -138,7 +139,6 @@ def calc_euler_error(s,par,sim,t):
     # c. Euler equation
     LHS = sim.C2[t+1]**(par.sigma)
     RHS = (1+sim.rt[t+1])*par.beta * sim.C1[t]**(par.sigma)
-
     return LHS-RHS
 
 def simulate_before_s(par,sim,t):
@@ -180,11 +180,13 @@ def simulate_after_s(par,sim,t,s):
 
     # a. consumption of young
     sim.C1[t] = (1-par.tau_w)*sim.w[t]-s
-
     # b. end-of-period stocks
     I = sim.Y[t] - sim.C1[t] - sim.C2[t] - sim.G[t]
     sim.K[t] = (1-par.delta)*sim.K_lag[t] + I
-
+    print(sim.K[t])
+#%%
+model = OLGModelClass()
+model.simulate()
 
 
 
