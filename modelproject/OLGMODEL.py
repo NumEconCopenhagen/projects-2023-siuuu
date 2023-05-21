@@ -6,12 +6,14 @@ from scipy import optimize
 
 class OLGModelClass():
 
-    def __init__(self,do_print=True):
+    def __init__(self):
         """ create the model """
 
         self.par = SimpleNamespace()
         self.sim = SimpleNamespace()
+
         self.setup()
+
         self.allocate()
     
     def setup(self):
@@ -21,22 +23,21 @@ class OLGModelClass():
 
         # a. household
         par.sigma = 1 # CRRA coefficient
-        par.beta = 0.22 # discount factor
+        par.beta = 1/1.40 # discount factor
 
         # b. firms
         par.production_function = 'cobb-douglas'
-        par.alpha = 0.33 # capital weight
+        par.alpha = 0.30 # capital weight
         par.theta = 0 # substitution parameter
-        par.delta = 0 # depreciation rate
-        par.A = 10 # TFP
+        par.delta = 0.50 # depreciation rate
 
         # c. government
-        par.tau_w = 0 # labor income tax
-        par.tau_r = 0 # capital income tax
+        par.tau_w = 0.10 # labor income tax
+        par.tau_r = 0.20 # capital income tax
 
         # d. misc
-        par.K_lag_ini = 0 # initial capital stock
-        par.B_lag_ini = 0 # initial government debt
+        par.K_lag_ini = 0.17*0.1 # initial capital stock
+        par.B_lag_ini = 0.0 # initial government debt
         par.simT = 50 # length of simulation
 
     def allocate(self):
@@ -56,7 +57,7 @@ class OLGModelClass():
         for varname in allvarnames:
             sim.__dict__[varname] = np.nan*np.ones(par.simT)
 
-    def simulate(self,do_print=True):
+    def simulate(self):
         """ simulate model """
 
         t0 = time.time()
@@ -87,13 +88,12 @@ class OLGModelClass():
             # iii. simulate after s
             simulate_after_s(par,sim,t,s)
 
-
-def find_s_bracket(par,sim,t,maxiter=1000,do_print=False):
+def find_s_bracket(par,sim,t,maxiter=500):
     """ find bracket for s to search in """
 
     # a. maximum bracket
-    s_min = 0.0 + 1e-9 # save almost nothing
-    s_max = 1.0 - 1e-9 # save almost everything
+    s_min = 0.0 + 1e-8 # save almost nothing
+    s_max = 1.0 - 1e-8 # save almost everything
 
     # b. saving a lot is always possible 
     value = calc_euler_error(s_max,par,sim,t)
@@ -116,7 +116,7 @@ def find_s_bracket(par,sim,t,maxiter=1000,do_print=False):
         
         # iii. next step
         if valid and correct_sign: # found!
-            s_min = lower
+            s_min = s
             s_max = upper
             return s_min,s_max
         elif not valid: # too low s -> increase lower bound
@@ -137,8 +137,9 @@ def calc_euler_error(s,par,sim,t):
     simulate_before_s(par,sim,t+1) # next period
 
     # c. Euler equation
-    LHS = sim.C2[t+1]**(par.sigma)
-    RHS = (1+sim.rt[t+1])*par.beta * sim.C1[t]**(par.sigma)
+    LHS = sim.C1[t]**(-par.sigma)
+    RHS = (1+sim.rt[t+1])*par.beta * sim.C2[t+1]**(-par.sigma)
+
     return LHS-RHS
 
 def simulate_before_s(par,sim,t):
@@ -149,15 +150,27 @@ def simulate_before_s(par,sim,t):
         sim.B_lag[t] = sim.B[t-1]
 
     # a. production and factor prices
-    if par.production_function == 'cobb-douglas':
+    if par.production_function == 'ces':
 
         # i. production
-        sim.Y[t] = par.A*sim.K_lag[t]**par.alpha
+        sim.Y[t] = ( par.alpha*sim.K_lag[t]**(-par.theta) + (1-par.alpha)*(1.0)**(-par.theta) )**(-1.0/par.theta)
 
         # ii. factor prices
-        sim.rk[t] = par.A * par.alpha * sim.K_lag[t]**(par.alpha-1)
-        sim.w[t] = (1-par.alpha) * sim.K_lag[t]**(par.alpha)
+        sim.rk[t] = par.alpha*sim.K_lag[t]**(-par.theta-1) * sim.Y[t]**(1.0+par.theta)
+        sim.w[t] = (1-par.alpha)*(1.0)**(-par.theta-1) * sim.Y[t]**(1.0+par.theta)
 
+    elif par.production_function == 'cobb-douglas':
+
+        # i. production
+        sim.Y[t] = sim.K_lag[t]**par.alpha * (1.0)**(1-par.alpha)
+
+        # ii. factor prices
+        sim.rk[t] = par.alpha * sim.K_lag[t]**(par.alpha-1) * (1.0)**(1-par.alpha)
+        sim.w[t] = (1-par.alpha) * sim.K_lag[t]**(par.alpha) * (1.0)**(-par.alpha)
+
+    else:
+
+        raise NotImplementedError('unknown type of production function')
 
     # b. no-arbitrage and after-tax return
     sim.r[t] = sim.rk[t]-par.delta # after-depreciation return
@@ -179,14 +192,8 @@ def simulate_after_s(par,sim,t,s):
     """ simulate forward """
 
     # a. consumption of young
-    sim.C1[t] = (1-par.tau_w)*sim.w[t]-s
+    sim.C1[t] = (1-par.tau_w)*sim.w[t]*(1.0-s)
+
     # b. end-of-period stocks
     I = sim.Y[t] - sim.C1[t] - sim.C2[t] - sim.G[t]
     sim.K[t] = (1-par.delta)*sim.K_lag[t] + I
-    print(sim.K[t])
-#%%
-model = OLGModelClass()
-model.simulate()
-
-
-
