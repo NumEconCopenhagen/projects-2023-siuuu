@@ -1,3 +1,7 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.integrate import odeint
+
 class ODESolver:
     def __init__(self, f): 
         # Wrap user’s f in a new function that always
