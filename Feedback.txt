@@ -1,0 +1,32 @@
+Feedback:
+
+Anders Peter Bruun:
+	Inaugural project:
+    -   s (https://github.com/NumEconCopenhagen/projects-2023-s/issues)
+
+	Data analysis project:
+   
+
+	Model analysis project:
+    -   zds655 (https://github.com/NumEconCopenhagen/projects-2023-zds655/issues)
+    
+Jakob Espinoza:
+	Inaugural project:
+    -   ts-nt (https://github.com/NumEconCopenhagen/projects-2023-ts-nt/issues)
+
+	Data analysis project:
+    -   mmj (https://github.com/NumEconCopenhagen/projects-2023-mmj/issues)
+
+	Model analysis project:
+    
+
+Jan Mao Zeeberg:
+	Inaugural project:
+
+	Data analysis project:
+    - scb (https://github.com/NumEconCopenhagen/projects-2023-scb/issues)
+    	
+	Model analysis project:
+    - ts-nt(https://github.com/NumEconCopenhagen/projects-2023-peter_kj/issues)
+   
+
